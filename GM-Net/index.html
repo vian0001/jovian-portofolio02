@@ -1,1 +1,2044 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GM.NET Daily Finance Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    /* === CSS Variables & Theme === */
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: #1a2332;
+      --bg-input: #0d1420;
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-cyan: #00f5ff;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --border-color: #2d3748;
+      --shadow: 0 4px 20px rgba(0, 245, 255, 0.1);
+      --shadow-lg: 0 10px 40px rgba(0, 245, 255, 0.15);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    .light-theme {
+      --bg-primary: #f3f4f6;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f9fafb;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --border-color: #e5e7eb;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* === Base Styles === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+
+    /* === Scrollbar === */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-cyan);
+      border-radius: 4px;
+    }
+
+    /* === Container === */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* === Header === */
+    .header {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: #000;
+      text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .logo-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-text .date {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* === Buttons === */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 245, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .btn-danger {
+      background: var(--accent-red);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-success {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      width: 36px;
+      height: 36px;
+      justify-content: center;
+    }
+
+    /* === Summary Cards === */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .summary-card.income::before { background: var(--accent-green); }
+    .summary-card.expense::before { background: var(--accent-red); }
+    .summary-card.net::before { background: var(--accent-cyan); }
+    .summary-card.avg::before { background: var(--accent-purple); }
+    .summary-card.count::before { background: var(--accent-yellow); }
+
+    .summary-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .summary-card .label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-card .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .summary-card.income .value { color: var(--accent-green); }
+    .summary-card.expense .value { color: var(--accent-red); }
+    .summary-card.net .value { color: var(--accent-cyan); }
+    .summary-card.avg .value { color: var(--accent-purple); }
+    .summary-card.count .value { color: var(--accent-yellow); }
+
+    .summary-card .sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* === Quick Stats === */
+    .quick-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .quick-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-stat .icon {
+      font-size: 18px;
+    }
+
+    .quick-stat .highlight {
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* === Filter Bar === */
+    .filter-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .filter-group label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* === Form Inputs === */
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* === Main Grid === */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* === Form Panel === */
+    .form-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .form-panel h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-group .error {
+      font-size: 12px;
+      color: var(--accent-red);
+      margin-top: 4px;
+    }
+
+    .form-group .char-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* === Data Table === */
+    .table-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-header h2 {
+      font-size: 18px;
+      color: var(--accent-cyan);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    th:hover {
+      color: var(--accent-cyan);
+    }
+
+    th.sorted {
+      color: var(--accent-cyan);
+    }
+
+    tr:hover {
+      background: rgba(0, 245, 255, 0.05);
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    .currency {
+      font-family: 'Consolas', monospace;
+      color: var(--accent-green);
+    }
+
+    .currency.expense {
+      color: var(--accent-red);
+    }
+
+    .keterangan-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* === Charts Section === */
+    .charts-section {
+      margin-top: 24px;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .chart-card h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+    }
+
+    /* === Modal === */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      color: var(--accent-cyan);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--accent-red);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* === Toast === */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      min-width: 280px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success { border-left: 4px solid var(--accent-green); }
+    .toast.error { border-left: 4px solid var(--accent-red); }
+    .toast.warning { border-left: 4px solid var(--accent-yellow); }
+    .toast.info { border-left: 4px solid var(--accent-cyan); }
+
+    .toast .icon { font-size: 20px; }
+    .toast.success .icon { color: var(--accent-green); }
+    .toast.error .icon { color: var(--accent-red); }
+    .toast.warning .icon { color: var(--accent-yellow); }
+    .toast.info .icon { color: var(--accent-cyan); }
+
+    .toast .message { flex: 1; font-size: 14px; }
+
+    .toast .action {
+      background: none;
+      border: none;
+      color: var(--accent-cyan);
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .toast .close-toast {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+    }
+
+    /* === Import Preview === */
+    .import-preview {
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .import-preview h4 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .import-preview .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .import-preview .stat:last-child {
+      border-bottom: none;
+    }
+
+    .import-mode {
+      margin-top: 16px;
+    }
+
+    .import-mode label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .import-mode label:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .import-mode input[type="radio"] {
+      width: auto;
+    }
+
+    /* === Print Styles === */
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+      .header-actions, .filter-bar, .form-panel, .btn, .action-btns, .toast-container, .modal-overlay {
+        display: none !important;
+      }
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .summary-card, .chart-card, .table-panel {
+        break-inside: avoid;
+        border: 1px solid #ccc;
+      }
+      .summary-card .value, td, th {
+        color: black !important;
+      }
+      .currency {
+        color: #059669 !important;
+      }
+      .currency.expense {
+        color: #dc2626 !important;
+      }
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+      }
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .filter-bar {
+        flex-direction: column;
+      }
+      .filter-group {
+        width: 100%;
+      }
+      .summary-card .value {
+        font-size: 20px;
+      }
+      .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-panel {
+        position: static;
+      }
+    }
+
+    /* === Theme Toggle === */
+    .theme-toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: var(--bg-input);
+      border-radius: 13px;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-toggle::after {
+      content: '🌙';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .light-theme .theme-toggle::after {
+      left: 26px;
+      content: '☀️';
+    }
+
+    /* === Hidden file input === */
+    .hidden-input {
+      display: none;
+    }
+
+    /* === Aggregation Toggle === */
+    .view-toggle {
+      display: flex;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .view-toggle button {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .view-toggle button.active {
+      background: var(--accent-cyan);
+      color: #000;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">GM</div>
+          <div class="logo-text">
+            <h1>GM.NET</h1>
+            <div class="date" id="currentDate"></div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="theme-toggle" id="themeToggle" title="Toggle tema"></div>
+          <button class="btn btn-secondary" onclick="showImportModal()">
+            📥 Import JSON
+          </button>
+          <button class="btn btn-secondary" onclick="exportJSON()">
+            📤 Export JSON
+          </button>
+          <button class="btn btn-secondary" onclick="exportCSV()">
+            📊 Export CSV
+          </button>
+          <button class="btn btn-secondary" onclick="window.print()">
+            🖨️ Print
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="showResetModal()">
+            🗑️ Reset
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid" id="summaryGrid">
+      <div class="summary-card income">
+        <div class="label">Total Pendapatan</div>
+        <div class="value" id="totalPendapatan">Rp 0</div>
+        <div class="sub" id="pendapatanSub">dari 0 hari</div>
+      </div>
+      <div class="summary-card expense">
+        <div class="label">Total Kas Harian</div>
+        <div class="value" id="totalKasHarian">Rp 0</div>
+        <div class="sub" id="kasHarianSub">pengeluaran operasional</div>
+      </div>
+      <div class="summary-card net">
+        <div class="label">Net Profit</div>
+        <div class="value" id="netProfit">Rp 0</div>
+        <div class="sub" id="netSub">pendapatan - kas harian</div>
+      </div>
+      <div class="summary-card avg">
+        <div class="label">Rata-rata/Hari</div>
+        <div class="value" id="avgPendapatan">Rp 0</div>
+        <div class="sub">pendapatan harian</div>
+      </div>
+      <div class="summary-card count">
+        <div class="label">Jumlah Entri</div>
+        <div class="value" id="entryCount">0</div>
+        <div class="sub" id="dateRange">-</div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats" id="quickStats">
+      <div class="quick-stat">
+        <span class="icon">🏆</span>
+        <span>Hari Terbaik: <span class="highlight" id="bestDay">-</span></span>
+      </div>
+      <div class="quick-stat">
+        <span class="icon">⭐</span>
+        <span>Operator Terbaik: <span class="highlight" id="bestOperator">-</span></span>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>🔍 Cari</label>
+        <input type="text" id="searchInput" placeholder="Cari operator/keterangan..." oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>📅 Dari Tanggal</label>
+        <input type="date" id="filterDateFrom" onchange="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>📅 Sampai Tanggal</label>
+        <input type="date" id="filterDateTo" onchange="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>👤 Operator</label>
+        <select id="filterOperator" onchange="applyFilters()">
+          <option value="">Semua Operator</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex: 0;">
+        <label>&nbsp;</label>
+        <button class="btn btn-secondary" onclick="clearFilters()">Reset Filter</button>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      <!-- Form Panel -->
+      <div class="form-panel">
+        <h2>➕ Tambah Entri Baru</h2>
+        <form id="entryForm" onsubmit="handleFormSubmit(event)">
+          <input type="hidden" id="editId">
+          <div class="form-group">
+            <label>Tanggal *</label>
+            <input type="date" id="inputTanggal" required>
+            <div class="error" id="errorTanggal"></div>
+          </div>
+          <div class="form-group">
+            <label>Operator *</label>
+            <input type="text" id="inputOperator" placeholder="Nama operator" required minlength="2">
+            <div class="error" id="errorOperator"></div>
+          </div>
+          <div class="form-group">
+            <label>Pendapatan (IDR) *</label>
+            <input type="number" id="inputPendapatan" placeholder="150000" min="0" required>
+            <div class="error" id="errorPendapatan"></div>
+          </div>
+          <div class="form-group">
+            <label>Kas Harian (IDR) *</label>
+            <input type="number" id="inputKasHarian" placeholder="50000" min="0" required>
+            <div class="error" id="errorKasHarian"></div>
+          </div>
+          <div class="form-group">
+            <label>Keterangan</label>
+            <textarea id="inputKeterangan" placeholder="Catatan tambahan..." maxlength="200"></textarea>
+            <div class="char-count"><span id="charCount">0</span>/200</div>
+            <div class="error" id="errorKeterangan"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="submitBtn">
+            ✅ Tambah Entri
+          </button>
+          <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 8px; display: none;" id="cancelEditBtn" onclick="cancelEdit()">
+            ❌ Batal Edit
+          </button>
+        </form>
+      </div>
+
+      <!-- Table Panel -->
+      <div class="table-panel">
+        <div class="table-header">
+          <h2>📋 Data Keuangan Harian</h2>
+          <div class="table-actions">
+            <div class="view-toggle">
+              <button class="active" id="viewDaily" onclick="setViewMode('daily')">Harian</button>
+              <button id="viewMonthly" onclick="setViewMode('monthly')">Bulanan</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable('tanggal')">Tanggal ▼</th>
+                <th onclick="sortTable('operator')">Operator</th>
+                <th onclick="sortTable('pendapatan')">Pendapatan</th>
+                <th onclick="sortTable('kasHarian')">Kas Harian</th>
+                <th>Keterangan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>📈 Trend Pendapatan</h3>
+          <div class="chart-wrapper">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>📊 Kas Harian per Tanggal</h3>
+          <div class="chart-wrapper">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>🍩 Share Pendapatan per Operator</h3>
+          <div class="chart-wrapper">
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📥 Import Data JSON</h3>
+        <button class="modal-close" onclick="closeModal('importModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="file" id="importFileInput" accept=".json" class="hidden-input" onchange="handleFileSelect(event)">
+        <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('importFileInput').click()">
+          📁 Pilih File JSON
+        </button>
+        <div class="import-preview" id="importPreview" style="display: none;">
+          <h4>Preview Data:</h4>
+          <div class="stat">
+            <span>Jumlah Entri:</span>
+            <span id="previewCount">0</span>
+          </div>
+          <div class="stat">
+            <span>Rentang Tanggal:</span>
+            <span id="previewDateRange">-</span>
+          </div>
+          <div class="stat">
+            <span>Total Pendapatan:</span>
+            <span id="previewTotal">Rp 0</span>
+          </div>
+          <div class="import-mode">
+            <label>
+              <input type="radio" name="importMode" value="replace" checked>
+              <div>
+                <strong>Ganti Semua</strong>
+                <div style="font-size: 12px; color: var(--text-muted);">Hapus data lama, gunakan data baru</div>
+              </div>
+            </label>
+            <label>
+              <input type="radio" name="importMode" value="merge">
+              <div>
+                <strong>Gabungkan</strong>
+                <div style="font-size: 12px; color: var(--text-muted);">Skip duplikat, tambahkan yang baru</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('importModal')">Batal</button>
+        <button class="btn btn-primary" id="confirmImportBtn" onclick="confirmImport()" disabled>Import Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="confirmTitle">Konfirmasi</h3>
+        <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Apakah kamu yakin?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Batal</button>
+        <button class="btn btn-danger" id="confirmActionBtn">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === GLOBAL STATE ===
+    let entries = [];
+    let filteredEntries = [];
+    let sortField = 'tanggal';
+    let sortDirection = 'desc';
+    let viewMode = 'daily';
+    let pendingImportData = null;
+    let deletedEntryStack = [];
+    let charts = {};
+
+    const STORAGE_KEY = 'gmnet_entries_v1';
+
+    // === UTILITY FUNCTIONS ===
+    
+    // Generate unique ID
+    function generateId() {
+      return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Format currency to IDR
+    function formatIDR(amount) {
+      return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Format date for display
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // Get today's date in YYYY-MM-DD format
+    function getTodayDate() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // === STORAGE FUNCTIONS ===
+
+    // Load entries from localStorage
+    function loadEntries() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          entries = JSON.parse(stored);
+        } else {
+          entries = [];
+        }
+      } catch (e) {
+        console.error('Error loading entries:', e);
+        entries = [];
+      }
+      applyFilters();
+    }
+
+    // Save entries to localStorage
+    function saveEntries() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      } catch (e) {
+        console.error('Error saving entries:', e);
+        showToast('Gagal menyimpan data!', 'error');
+      }
+    }
+
+    // === TOAST NOTIFICATIONS ===
+    function showToast(message, type = 'info', action = null, actionLabel = 'Undo') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+      
+      let html = `
+        <span class="icon">${icons[type]}</span>
+        <span class="message">${escapeHtml(message)}</span>
+      `;
+      
+      if (action) {
+        html += `<button class="action" onclick="(${action})(); this.parentElement.remove();">${actionLabel}</button>`;
+      }
+      
+      html += `<button class="close-toast" onclick="this.parentElement.remove()">×</button>`;
+      
+      toast.innerHTML = html;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 5000);
+    }
+
+    // === MODAL FUNCTIONS ===
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function showImportModal() {
+      document.getElementById('importPreview').style.display = 'none';
+      document.getElementById('confirmImportBtn').disabled = true;
+      document.getElementById('importFileInput').value = '';
+      pendingImportData = null;
+      showModal('importModal');
+    }
+
+    function showResetModal() {
+      document.getElementById('confirmTitle').textContent = '🗑️ Reset Semua Data';
+      document.getElementById('confirmMessage').textContent = 'Apakah kamu yakin ingin menghapus SEMUA data? Tindakan ini tidak bisa dibatalkan!';
+      document.getElementById('confirmActionBtn').onclick = resetAllData;
+      showModal('confirmModal');
+    }
+
+    function showDeleteModal(id) {
+      document.getElementById('confirmTitle').textContent = '🗑️ Hapus Entri';
+      document.getElementById('confirmMessage').textContent = 'Apakah kamu yakin ingin menghapus entri ini?';
+      document.getElementById('confirmActionBtn').onclick = () => deleteEntry(id);
+      showModal('confirmModal');
+    }
+
+    // === FORM HANDLING ===
+
+    // Handle form submission
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      
+      // Clear previous errors
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
+      
+      // Get values
+      const editId = document.getElementById('editId').value;
+      const tanggal = document.getElementById('inputTanggal').value;
+      const operator = document.getElementById('inputOperator').value.trim();
+      const pendapatan = parseFloat(document.getElementById('inputPendapatan').value) || 0;
+      const kasHarian = parseFloat(document.getElementById('inputKasHarian').value) || 0;
+      const keterangan = document.getElementById('inputKeterangan').value.trim();
+      
+      // Validation
+      let isValid = true;
+      
+      if (!tanggal) {
+        document.getElementById('errorTanggal').textContent = 'Tanggal harus diisi';
+        isValid = false;
+      }
+      
+      if (!operator || operator.length < 2) {
+        document.getElementById('errorOperator').textContent = 'Nama operator minimal 2 karakter';
+        isValid = false;
+      }
+      
+      if (pendapatan < 0) {
+        document.getElementById('errorPendapatan').textContent = 'Pendapatan tidak boleh negatif';
+        isValid = false;
+      }
+      
+      if (kasHarian < 0) {
+        document.getElementById('errorKasHarian').textContent = 'Kas harian tidak boleh negatif';
+        isValid = false;
+      }
+      
+      if (keterangan.length > 200) {
+        document.getElementById('errorKeterangan').textContent = 'Keterangan maksimal 200 karakter';
+        isValid = false;
+      }
+      
+      if (!isValid) return;
+      
+      const now = new Date().toISOString();
+      
+      if (editId) {
+        // Update existing entry
+        const index = entries.findIndex(e => e.id === editId);
+        if (index !== -1) {
+          entries[index] = {
+            ...entries[index],
+            tanggal,
+            operator,
+            pendapatan,
+            kasHarian,
+            keterangan,
+            updatedAt: now
+          };
+          showToast('Entri berhasil diupdate!', 'success');
+        }
+        cancelEdit();
+      } else {
+        // Add new entry
+        const newEntry = {
+          id: generateId(),
+          tanggal,
+          operator,
+          pendapatan,
+          kasHarian,
+          keterangan,
+          createdAt: now,
+          updatedAt: now
+        };
+        entries.push(newEntry);
+        showToast('Entri tersimpan!', 'success');
+      }
+      
+      saveEntries();
+      applyFilters();
+      resetForm();
+    }
+
+    // Reset form
+    function resetForm() {
+      document.getElementById('entryForm').reset();
+      document.getElementById('editId').value = '';
+      document.getElementById('inputTanggal').value = getTodayDate();
+      document.getElementById('charCount').textContent = '0';
+      document.getElementById('submitBtn').textContent = '✅ Tambah Entri';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+    }
+
+    // Edit entry
+    function editEntry(id) {
+      const entry = entries.find(e => e.id === id);
+      if (!entry) return;
+      
+      document.getElementById('editId').value = entry.id;
+      document.getElementById('inputTanggal').value = entry.tanggal;
+      document.getElementById('inputOperator').value = entry.operator;
+      document.getElementById('inputPendapatan').value = entry.pendapatan;
+      document.getElementById('inputKasHarian').value = entry.kasHarian;
+      document.getElementById('inputKeterangan').value = entry.keterangan || '';
+      document.getElementById('charCount').textContent = (entry.keterangan || '').length;
+      document.getElementById('submitBtn').textContent = '💾 Update Entri';
+      document.getElementById('cancelEditBtn').style.display = 'block';
+      
+      document.querySelector('.form-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Cancel edit
+    function cancelEdit() {
+      resetForm();
+    }
+
+    // Delete entry
+    function deleteEntry(id) {
+      const index = entries.findIndex(e => e.id === id);
+      if (index !== -1) {
+        const deleted = entries.splice(index, 1)[0];
+        deletedEntryStack.push(deleted);
+        
+        saveEntries();
+        applyFilters();
+        closeModal('confirmModal');
+        
+        showToast('Entri dihapus!', 'warning', `undoDelete`, 'Undo');
+        
+        // Auto-clear undo after 5 seconds
+        setTimeout(() => {
+          const idx = deletedEntryStack.findIndex(e => e.id === deleted.id);
+          if (idx !== -1) {
+            deletedEntryStack.splice(idx, 1);
+          }
+        }, 5000);
+      }
+    }
+
+    // Undo delete
+    function undoDelete() {
+      if (deletedEntryStack.length > 0) {
+        const entry = deletedEntryStack.pop();
+        entries.push(entry);
+        saveEntries();
+        applyFilters();
+        showToast('Entri dikembalikan!', 'success');
+      }
+    }
+
+    // Reset all data
+    function resetAllData() {
+      entries = [];
+      saveEntries();
+      applyFilters();
+      closeModal('confirmModal');
+      showToast('Semua data telah dihapus!', 'warning');
+    }
+
+    // === FILTERING & SORTING ===
+
+    // Apply filters and update display
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+      const operatorFilter = document.getElementById('filterOperator').value;
+      
+      filteredEntries = entries.filter(entry => {
+        // Search filter
+        if (searchTerm) {
+          const searchMatch = 
+            entry.operator.toLowerCase().includes(searchTerm) ||
+            (entry.keterangan && entry.keterangan.toLowerCase().includes(searchTerm));
+          if (!searchMatch) return false;
+        }
+        
+        // Date range filter
+        if (dateFrom && entry.tanggal < dateFrom) return false;
+        if (dateTo && entry.tanggal > dateTo) return false;
+        
+        // Operator filter
+        if (operatorFilter && entry.operator !== operatorFilter) return false;
+        
+        return true;
+      });
+      
+      // Sort
+      filteredEntries.sort((a, b) => {
+        let valA = a[sortField];
+        let valB = b[sortField];
+        
+        if (sortField === 'tanggal') {
+          valA = new Date(valA);
+          valB = new Date(valB);
+        }
+        
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+      
+      updateOperatorDropdown();
+      renderTable();
+      renderSummary();
+      renderQuickStats();
+      renderCharts();
+    }
+
+    // Sort table by field
+    function sortTable(field) {
+      if (sortField === field) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortField = field;
+        sortDirection = 'desc';
+      }
+      applyFilters();
+    }
+
+    // Clear all filters
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterDateFrom').value = '';
+      document.getElementById('filterDateTo').value = '';
+      document.getElementById('filterOperator').value = '';
+      applyFilters();
+    }
+
+    // Update operator dropdown
+    function updateOperatorDropdown() {
+      const select = document.getElementById('filterOperator');
+      const currentValue = select.value;
+      const operators = [...new Set(entries.map(e => e.operator))].sort();
+      
+      select.innerHTML = '<option value="">Semua Operator</option>';
+      operators.forEach(op => {
+        const option = document.createElement('option');
+        option.value = op;
+        option.textContent = op;
+        select.appendChild(option);
+      });
+      
+      select.value = currentValue;
+    }
+
+    // Set view mode (daily/monthly)
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.getElementById('viewDaily').classList.toggle('active', mode === 'daily');
+      document.getElementById('viewMonthly').classList.toggle('active', mode === 'monthly');
+      renderTable();
+      renderCharts();
+    }
+
+    // === RENDERING FUNCTIONS ===
+
+    // Render data table
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      
+      if (filteredEntries.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="icon">📭</div>
+                <div>Belum ada data</div>
+                <div style="font-size: 13px; margin-top: 8px;">Mulai tambahkan entri keuangan harian</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      if (viewMode === 'monthly') {
+        renderMonthlyTable(tbody);
+        return;
+      }
+      
+      tbody.innerHTML = filteredEntries.map(entry => `
+        <tr>
+          <td>${formatDate(entry.tanggal)}</td>
+          <td>${escapeHtml(entry.operator)}</td>
+          <td class="currency">${formatIDR(entry.pendapatan)}</td>
+          <td class="currency expense">${formatIDR(entry.kasHarian)}</td>
+          <td class="keterangan-cell" title="${escapeHtml(entry.keterangan || '')}">${escapeHtml(entry.keterangan || '-')}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-secondary btn-sm" onclick="editEntry('${entry.id}')">✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="showDeleteModal('${entry.id}')">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render monthly aggregated table
+    function renderMonthlyTable(tbody) {
+      const monthly = {};
+      
+      filteredEntries.forEach(entry => {
+        const month = entry.tanggal.substring(0, 7); // YYYY-MM
+        if (!monthly[month]) {
+          monthly[month] = { pendapatan: 0, kasHarian: 0, count: 0, operators: new Set() };
+        }
+        monthly[month].pendapatan += entry.pendapatan;
+        monthly[month].kasHarian += entry.kasHarian;
+        monthly[month].count++;
+        monthly[month].operators.add(entry.operator);
+      });
+      
+      const months = Object.keys(monthly).sort().reverse();
+      
+      tbody.innerHTML = months.map(month => {
+        const data = monthly[month];
+        const [year, mon] = month.split('-');
+        const monthName = new Date(year, parseInt(mon) - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        return `
+          <tr>
+            <td>${monthName}</td>
+            <td>${data.operators.size} operator</td>
+            <td class="currency">${formatIDR(data.pendapatan)}</td>
+            <td class="currency expense">${formatIDR(data.kasHarian)}</td>
+            <td>${data.count} hari</td>
+            <td>-</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render summary cards
+    function renderSummary() {
+      const totalPendapatan = filteredEntries.reduce((sum, e) => sum + e.pendapatan, 0);
+      const totalKasHarian = filteredEntries.reduce((sum, e) => sum + e.kasHarian, 0);
+      const netProfit = totalPendapatan - totalKasHarian;
+      const avgPendapatan = filteredEntries.length > 0 ? Math.round(totalPendapatan / filteredEntries.length) : 0;
+      
+      document.getElementById('totalPendapatan').textContent = formatIDR(totalPendapatan);
+      document.getElementById('totalKasHarian').textContent = formatIDR(totalKasHarian);
+      document.getElementById('netProfit').textContent = formatIDR(netProfit);
+      document.getElementById('avgPendapatan').textContent = formatIDR(avgPendapatan);
+      document.getElementById('entryCount').textContent = filteredEntries.length;
+      
+      document.getElementById('pendapatanSub').textContent = `dari ${filteredEntries.length} entri`;
+      
+      if (filteredEntries.length > 0) {
+        const dates = filteredEntries.map(e => e.tanggal).sort();
+        document.getElementById('dateRange').textContent = `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
+      } else {
+        document.getElementById('dateRange').textContent = '-';
+      }
+    }
+
+    // Render quick stats
+    function renderQuickStats() {
+      if (filteredEntries.length === 0) {
+        document.getElementById('bestDay').textContent = '-';
+        document.getElementById('bestOperator').textContent = '-';
+        return;
+      }
+      
+      // Best day
+      const bestDay = filteredEntries.reduce((best, e) => e.pendapatan > best.pendapatan ? e : best);
+      document.getElementById('bestDay').textContent = `${formatDate(bestDay.tanggal)} (${formatIDR(bestDay.pendapatan)})`;
+      
+      // Best operator
+      const operatorTotals = {};
+      filteredEntries.forEach(e => {
+        operatorTotals[e.operator] = (operatorTotals[e.operator] || 0) + e.pendapatan;
+      });
+      const bestOp = Object.entries(operatorTotals).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById('bestOperator').textContent = `${bestOp[0]} (${formatIDR(bestOp[1])})`;
+    }
+
+    // Render all charts
+    function renderCharts() {
+      renderLineChart();
+      renderBarChart();
+      renderPieChart();
+    }
+
+    // Render line chart (Pendapatan trend)
+    function renderLineChart() {
+      const ctx = document.getElementById('lineChart').getContext('2d');
+      
+      if (charts.line) {
+        charts.line.destroy();
+      }
+      
+      const data = getChartData();
+      
+      charts.line = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Pendapatan',
+            data: data.pendapatan,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => formatIDR(ctx.raw)
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => formatIDR(value),
+                color: '#9ca3af'
+              },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            x: {
+              ticks: { color: '#9ca3af' },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // Render bar chart (Kas Harian)
+    function renderBarChart() {
+      const ctx = document.getElementById('barChart').getContext('2d');
+      
+      if (charts.bar) {
+        charts.bar.destroy();
+      }
+      
+      const data = getChartData();
+      
+      charts.bar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Kas Harian',
+            data: data.kasHarian,
+            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+            borderColor: '#ef4444',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => formatIDR(ctx.raw)
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => formatIDR(value),
+                color: '#9ca3af'
+              },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            x: {
+              ticks: { color: '#9ca3af' },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // Render pie chart (Share per operator)
+    function renderPieChart() {
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      
+      if (charts.pie) {
+        charts.pie.destroy();
+      }
+      
+      const operatorTotals = {};
+      filteredEntries.forEach(e => {
+        operatorTotals[e.operator] = (operatorTotals[e.operator] || 0) + e.pendapatan;
+      });
+      
+      const labels = Object.keys(operatorTotals);
+      const data = Object.values(operatorTotals);
+      
+      const colors = [
+        '#00f5ff', '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', 
+        '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316'
+      ];
+      
+      charts.pie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderColor: '#1a2332',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: '#9ca3af', padding: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: ${formatIDR(ctx.raw)}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Get aggregated chart data
+    function getChartData() {
+      const aggregated = {};
+      
+      filteredEntries.forEach(entry => {
+        const key = viewMode === 'monthly' ? entry.tanggal.substring(0, 7) : entry.tanggal;
+        if (!aggregated[key]) {
+          aggregated[key] = { pendapatan: 0, kasHarian: 0 };
+        }
+        aggregated[key].pendapatan += entry.pendapatan;
+        aggregated[key].kasHarian += entry.kasHarian;
+      });
+      
+      const sorted = Object.keys(aggregated).sort();
+      
+      return {
+        labels: sorted.map(date => {
+          if (viewMode === 'monthly') {
+            const [year, mon] = date.split('-');
+            return new Date(year, parseInt(mon) - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+          }
+          return formatDate(date);
+        }),
+        pendapatan: sorted.map(d => aggregated[d].pendapatan),
+        kasHarian: sorted.map(d => aggregated[d].kasHarian)
+      };
+    }
+
+    // === IMPORT/EXPORT FUNCTIONS ===
+
+    // Handle file selection for import
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          // Validate schema
+          if (!data.meta || !data.entries || !Array.isArray(data.entries)) {
+            throw new Error('Format JSON tidak valid');
+          }
+          
+          if (data.meta.version !== 1) {
+            throw new Error('Versi tidak didukung');
+          }
+          
+          pendingImportData = data;
+          
+          // Show preview
+          const preview = document.getElementById('importPreview');
+          preview.style.display = 'block';
+          
+          document.getElementById('previewCount').textContent = data.entries.length;
+          
+          if (data.entries.length > 0) {
+            const dates = data.entries.map(e => e.tanggal).sort();
+            document.getElementById('previewDateRange').textContent = 
+              `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
+            
+            const total = data.entries.reduce((sum, e) => sum + e.pendapatan, 0);
+            document.getElementById('previewTotal').textContent = formatIDR(total);
+          } else {
+            document.getElementById('previewDateRange').textContent = '-';
+            document.getElementById('previewTotal').textContent = 'Rp 0';
+          }
+          
+          document.getElementById('confirmImportBtn').disabled = false;
+          
+        } catch (err) {
+          console.error('Import error:', err);
+          showToast('Gagal membaca file: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Confirm import
+    function confirmImport() {
+      if (!pendingImportData) return;
+      
+      const mode = document.querySelector('input[name="importMode"]:checked').value;
+      
+      if (mode === 'replace') {
+        entries = pendingImportData.entries.map(e => ({
+          ...e,
+          id: e.id || generateId()
+        }));
+      } else {
+        // Merge mode
+        const existingIds = new Set(entries.map(e => e.id));
+        const existingSignatures = new Set(entries.map(e => 
+          `${e.tanggal}|${e.operator}|${e.pendapatan}|${e.kasHarian}|${e.keterangan || ''}`
+        ));
+        
+        pendingImportData.entries.forEach(newEntry => {
+          const signature = `${newEntry.tanggal}|${newEntry.operator}|${newEntry.pendapatan}|${newEntry.kasHarian}|${newEntry.keterangan || ''}`;
+          
+          if (!existingIds.has(newEntry.id) && !existingSignatures.has(signature)) {
+            entries.push({
+              ...newEntry,
+              id: newEntry.id || generateId()
+            });
+          }
+        });
+      }
+      
+      saveEntries();
+      applyFilters();
+      closeModal('importModal');
+      showToast(`${pendingImportData.entries.length} entri berhasil diimport!`, 'success');
+      pendingImportData = null;
+    }
+
+    // Export to JSON
+    function exportJSON() {
+      const exportData = {
+        meta: {
+          app: 'GM.NET Daily Finance Report',
+          version: 1,
+          currency: 'IDR',
+          exportedAt: new Date().toISOString()
+        },
+        entries: entries
+      };
+      
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gmnet-report-${getTodayDate()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('Data berhasil diekspor ke JSON!', 'success');
+    }
+
+    // Export to CSV
+    function exportCSV() {
+      if (entries.length === 0) {
+        showToast('Tidak ada data untuk diekspor', 'warning');
+        return;
+      }
+      
+      const headers = ['Tanggal', 'Operator', 'Pendapatan', 'Kas Harian', 'Keterangan'];
+      const rows = entries.map(e => [
+        e.tanggal,
+        `"${e.operator}"`,
+        e.pendapatan,
+        e.kasHarian,
+        `"${(e.keterangan || '').replace(/"/g, '""')}"`
+      ]);
+      
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gmnet-report-${getTodayDate()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('Data berhasil diekspor ke CSV!', 'success');
+    }
+
+    // === THEME TOGGLE ===
+    function initTheme() {
+      const toggle = document.getElementById('themeToggle');
+      const savedTheme = localStorage.getItem('gmnet_theme') || 'dark';
+      
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+      }
+      
+      toggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        localStorage.setItem('gmnet_theme', isLight ? 'light' : 'dark');
+        
+        // Re-render charts for theme colors
+        setTimeout(renderCharts, 100);
+      });
+    }
+
+    // === EVENT LISTENERS ===
+    function initEventListeners() {
+      // Character count for keterangan
+      document.getElementById('inputKeterangan').addEventListener('input', function() {
+        document.getElementById('charCount').textContent = this.value.length;
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Escape to close modals
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+            modal.classList.remove('active');
+          });
+        }
+      });
+      
+      // Close modal on overlay click
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.remove('active');
+          }
+        });
+      });
+    }
+
+    // === INITIALIZATION ===
+    function init() {
+      // Set current date display
+      document.getElementById('currentDate').textContent = 
+        new Date().toLocaleDateString('id-ID', { 
+          weekday: 'long', 
+          day: 'numeric', 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      
+      // Set default date in form
+      document.getElementById('inputTanggal').value = getTodayDate();
+      
+      // Initialize theme
+      initTheme();
+      
+      // Initialize event listeners
+      initEventListeners();
+      
+      // Load data
+      loadEntries();
+    }
+
+    // Start app when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
