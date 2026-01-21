@@ -1037,7 +1037,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
 // Project Card Interaction
 document.addEventListener('DOMContentLoaded', () => {
     const projectCards = document.querySelectorAll('.project-card');
