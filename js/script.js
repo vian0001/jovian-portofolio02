@@ -1,15 +1,16 @@
 
-// Welcome Screen Logic with Enhanced Animations
+// Welcome Screen Logic with Mode Selection
 document.addEventListener('DOMContentLoaded', function () {
     const welcomeScreen = document.getElementById('welcome-screen');
-    const enterButton = document.getElementById('enter-button');
+    const btnFast = document.getElementById('btn-fast');
+    const btnQuality = document.getElementById('btn-quality');
     const body = document.body;
     const typedText = document.getElementById('typed-text');
 
     // Prevent scrolling when welcome screen is shown
     body.style.overflow = 'hidden';
 
-    // Initialize particles
+    // Initialize particles (keep existing particle logic)
     if (typeof particlesJS !== 'undefined') {
         particlesJS('particles-js', {
             "particles": {
@@ -103,23 +104,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Start typing animation
     setTimeout(function () {
-        typeWriter("Welcome to My Portfolio", 0);
+        typeWriter("Choose Your Experience", 0);
     }, 800);
 
-    // Add sound effect for button click (optional)
+    // Audio functions
     function playClickSound() {
         const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAYGBgYGBgYGBgYGBgYGBgkJCQkJCQkJCQkJCQkJCQwMDAwMDAwMDAwMDAwMDA4ODg4ODg4ODg4ODg4ODg//////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAYVf//zgZAAAJgBNmdFAAJNqyqzM6ABDLCIkmZswACGWENTMzpgEMMIiSZmzAI+kzOTI1ZkzOgAkAAAaZnZtC5mTM6ACQAAA0zOzaFzMmZ0AEgAABpmdm0LmZMzoAJAAADTM7NoXMyZnQASAAAGmZ2bQuZkzOgAkAAAaZnZtC5mTM6ACQAAAz/0/h/B/6/7/jOEiRP//////////f/i+WTMmZ0AEgAABpmdm0LmZMzoAJAAADTM7NoXMyZnQAP5EEJlf//OBkIAAC0A1GZ2TKZWpmnszMk5vAhghJZmboP4M8II7M+IHQKcIfszgBDAZBCKzPCBoAy+EBTMhAFwGYQRyZiAMAMuhA4zEABcBmMEgGYEDABlsC7mZCALgMxgj8zAgYAMuAMAzEgCMBmoChGYCAHwMuAUQzAQA+BlwCiGYCAHwGaAKMZgQA+Ay4BQjMBAD4DNAFDDF/fxDfpVMQU1FMy45OS41VVVVVVVVVVVVf/zQZEIAA+4MRo2IAACgpJiPAAAR5hPBjRV8BBgCA+XWRf//////////A+n////////////6qqqqqqqqqqqqqg==');
-        audio.volume = 0.5; // 50% volume
+        audio.volume = 0.5;
         audio.play().catch(e => console.log("Audio couldn't play: ", e));
     }
 
-    // Enter button click event with enhanced effects
-    enterButton.addEventListener('click', function () {
-        // Add button click animation
-        this.classList.add('clicked');
+    function playHoverSound() {
+        const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAgAAAVIAYGBgYGBgYGBgYGBgYGBgkJCQkJCQkJCQkJCQkJCQ//////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQM//NUZAAOupcYYdAAACSiHhD+AAAQAAJ+gIAAAJv5hwAAAAAUeY8AAAAAA35nGAAAAAAI8xwAAAAABk/MgAAAAAD+Y8AAAAAA35nGAAAAAAI8xwAAAAABk/MgAAAAAD+Y8AAAAAA35f/zgZAOGfA0QzBsF8GcgjYzZgYAM+AowzAgZAM5BJBmJAyAZ8CwDMLBrAzkFLGbUDQBnwMAMzQGoDOQRgZoANAGfAwgzLwawM5BOhmhA0AZ8DJDMjBoAzkEZGZ4DQBnwMIMy8GsDOQRoZoQNAGfAyQzIwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmE//OBkM4VIDjDMHQbQapCLzMrIuAqOHRGZgRrBRsIbMyYjKCpwf0ZgAG4FHgdcZeQG4FRw94zEgNwKPBNxmHEbgUeCEDMII3ApADsGX+BuBRgHQMs+p0MQU1FMy45OS41VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8wGRPBWwOfQPWoAMKgmujxgABQAzU1VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==');
+        audio.volume = 0.3;
+        audio.play().catch(e => { });
+    }
 
-        // Optional: play sound effect
+    function enterSite(mode) {
         playClickSound();
+        
+        // Apply Fast Mode if selected
+        if (mode === 'fast') {
+            body.classList.add('fast-mode');
+            console.log("Fast Mode Activated 🚀");
+        } else {
+            body.classList.remove('fast-mode');
+            console.log("Quality Mode Activated ✨");
+        }
 
         // Add transition animation
         welcomeScreen.classList.add('hide');
@@ -128,15 +139,24 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
             body.style.overflow = 'auto';
             welcomeScreen.style.display = 'none';
-        }, 1200); // Match with CSS transition duration
+        }, 1200);
+    }
+
+    // Fast Mode Button
+    btnFast.addEventListener('click', function () {
+        this.classList.add('clicked');
+        enterSite('fast');
     });
 
-    // Add hover sound effect (optional)
-    enterButton.addEventListener('mouseenter', function () {
-        const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAgAAAVIAYGBgYGBgYGBgYGBgYGBgkJCQkJCQkJCQkJCQkJCQ//////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQM//NUZAAOupcYYdAAACSiHhD+AAAQAAJ+gIAAAJv5hwAAAAAUeY8AAAAAA35nGAAAAAAI8xwAAAAABk/MgAAAAAD+Y8AAAAAA35nGAAAAAAI8xwAAAAABk/MgAAAAAD+Y8AAAAAA35f/zgZAOGfA0QzBsF8GcgjYzZgYAM+AowzAgZAM5BJBmJAyAZ8CwDMLBrAzkFLGbUDQBnwMAMzQGoDOQRgZoANAGfAwgzLwawM5BOhmhA0AZ8DJDMjBoAzkEZGZ4DQBnwMIMy8GsDOQRoZoQNAGfAyQzIwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmEwmE//OBkM4VIDjDMHQbQapCLzMrIuAqOHRGZgRrBRsIbMyYjKCpwf0ZgAG4FHgdcZeQG4FRw94zEgNwKPBNxmHEbgUeCEDMII3ApADsGX+BuBRgHQMs+p0MQU1FMy45OS41VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8wGRPBWwOfQPWoAMKgmujxgABQAzU1VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==');
-        audio.volume = 0.3; // 30% volume
-        audio.play().catch(e => { });
+    btnFast.addEventListener('mouseenter', playHoverSound);
+
+    // Quality Mode Button
+    btnQuality.addEventListener('click', function () {
+        this.classList.add('clicked');
+        enterSite('quality');
     });
+
+    btnQuality.addEventListener('mouseenter', playHoverSound);
 });
 
 // Global language variable
